@@ -81,3 +81,44 @@ export const useAddReview = () => {
     },
   });
 };
+
+// 3. 단일 리뷰 상세 가져오기
+export const useGetReviewById = (id: string) => {
+  return useQuery({
+    queryKey: ['reviews', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          *,
+          profiles (id, nickname, avatar_url)
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data as Review;
+    },
+    enabled: !!id, // id가 있을 때만 실행
+  });
+};
+
+// 4. 내 리뷰만 가져오기 (달력, 마이페이지용)
+export const useGetMyReviews = () => {
+  return useQuery({
+    queryKey: ['my_reviews'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('로그인이 필요합니다.');
+
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('consumed_date', { ascending: false });
+
+      if (error) throw new Error(error.message);
+      return data as Review[];
+    },
+  });
+};

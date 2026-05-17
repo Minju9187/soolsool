@@ -3,15 +3,19 @@
 import { useState } from 'react';
 import { Search, History, TrendingUp, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useSearchReviews } from '@/features/search/api/useSearch';
+import Link from 'next/link';
+import { Star } from 'lucide-react';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
+  const { data: searchResults, isLoading } = useSearchReviews(query);
 
   const recentSearches = ['조니워커 블랙', '산토리 가쿠빈', '발베니 12년', '테라'];
   const trendingDrinks = ['짐빔 화이트', '야마자키 12년', '새로', '기네스 드래프트'];
 
   return (
-    <div className="px-4 py-8 animate-in fade-in duration-500">
+    <div className="px-4 py-8 animate-in fade-in duration-500 pb-24">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-6">
           어떤 술을 찾으시나요?
@@ -24,7 +28,7 @@ export default function SearchPage() {
           </div>
           <Input
             type="text"
-            placeholder="술 이름, 종류, 브랜드를 검색해보세요"
+            placeholder="술 이름, 종류, 리뷰 내용을 검색해보세요"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-12 h-14 bg-white dark:bg-zinc-900/50 border-0 shadow-lg shadow-slate-200/50 dark:shadow-none rounded-2xl text-base focus-visible:ring-orange-500 transition-all"
@@ -52,6 +56,7 @@ export default function SearchPage() {
               {recentSearches.map((item, idx) => (
                 <span 
                   key={idx} 
+                  onClick={() => setQuery(item)}
                   className="px-4 py-2 bg-white dark:bg-zinc-800 rounded-full text-sm font-medium text-slate-600 dark:text-slate-300 shadow-sm border border-slate-100 dark:border-zinc-700 cursor-pointer hover:bg-orange-50 dark:hover:bg-zinc-700 hover:text-orange-600 transition-colors"
                 >
                   {item}
@@ -70,6 +75,7 @@ export default function SearchPage() {
               {trendingDrinks.map((item, idx) => (
                 <div 
                   key={idx}
+                  onClick={() => setQuery(item)}
                   className="flex items-center gap-3 p-3 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-700 cursor-pointer hover:border-orange-200 transition-all active:scale-95"
                 >
                   <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-zinc-700 flex items-center justify-center font-bold text-orange-500">
@@ -82,9 +88,35 @@ export default function SearchPage() {
           </section>
         </div>
       ) : (
-        <div className="text-center py-20">
-          <p className="text-slate-500 dark:text-slate-400">"{query}" 검색 결과를 찾는 중...</p>
-          <p className="text-xs text-slate-400 mt-2">(추후 Supabase DB 연동 예정)</p>
+        <div className="space-y-4">
+          <h2 className="text-sm font-bold text-slate-500 px-2">'{query}' 검색 결과</h2>
+          {isLoading ? (
+            <div className="text-center py-10 text-slate-400">결과를 찾는 중...</div>
+          ) : searchResults && searchResults.length > 0 ? (
+            searchResults.map((review) => (
+              <Link key={review.id} href={`/review/${review.id}`} className="block">
+                <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 flex justify-between items-center transition-transform hover:border-orange-200 cursor-pointer">
+                  <div>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-200">{review.drink_name}</h3>
+                    <span className="text-xs text-slate-400">{review.drink_category} • {review.profiles?.nickname} 작성</span>
+                  </div>
+                  <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/30 px-3 py-1.5 rounded-lg">
+                    <Star size={14} className="fill-amber-400 text-amber-400" />
+                    <span className="font-bold text-amber-600 dark:text-amber-400 text-sm">{review.rating}</span>
+                  </div>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <div className="text-center py-20 bg-slate-50 dark:bg-zinc-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800">
+              <p className="text-slate-500 dark:text-slate-400">"{query}"에 대한 결과가 없습니다.</p>
+              <Link href="/add">
+                <Button variant="outline" className="mt-4 rounded-xl border-orange-200 text-orange-600 hover:bg-orange-50">
+                  직접 리뷰 남기기
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </div>
