@@ -1,5 +1,2 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+프로젝트의 전반적인 기획과 요구사항, 폴더 구조는 sool-sool.md 파일을 항상 최우선으로 읽고 이를 기반으로 개발할 것.
+기능 구현이 완료될 때마다 반드시 기능 단위(Feature-level)로 git 커밋을 작성할 것. (관심사 분리, Conventional Commits 지향)
