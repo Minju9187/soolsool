@@ -16,19 +16,14 @@ import {
 import { ChevronLeft, ChevronRight, Wine } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
-// 더미 데이터: 특정 날짜에 술을 마신 기록 (나중에는 DB에서 가져옴)
-const DUMMY_RECORDS = [
-  { date: new Date(new Date().getFullYear(), new Date().getMonth(), 5), type: 'wine', rating: 4.5 },
-  { date: new Date(new Date().getFullYear(), new Date().getMonth(), 12), type: 'whiskey', rating: 5.0 },
-  { date: new Date(new Date().getFullYear(), new Date().getMonth(), 15), type: 'beer', rating: 3.5 },
-  { date: new Date(new Date().getFullYear(), new Date().getMonth(), 22), type: 'soju', rating: 4.0 },
-  { date: new Date(new Date().getFullYear(), new Date().getMonth(), 28), type: 'sake', rating: 4.5 },
-];
+import { useGetMyReviews } from '@/features/reviews/api/useReviews';
+import Link from 'next/link';
 
 export default function SoolCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const { data: myReviews = [], isLoading } = useGetMyReviews();
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -52,7 +47,7 @@ export default function SoolCalendar() {
       const cloneDay = day;
       
       // 해당 날짜에 기록이 있는지 확인
-      const hasRecord = DUMMY_RECORDS.find(record => isSameDay(record.date, cloneDay));
+      const hasRecord = myReviews.find(record => isSameDay(new Date(record.consumed_date), cloneDay));
       const isSelected = isSameDay(day, selectedDate);
       const isCurrentMonth = isSameMonth(day, monthStart);
       const isToday = isSameDay(day, new Date());
@@ -94,6 +89,9 @@ export default function SoolCalendar() {
     days = [];
   }
 
+  // 선택된 날짜의 리뷰 필터링
+  const selectedDateReviews = myReviews.filter(record => isSameDay(new Date(record.consumed_date), selectedDate));
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
       <Card className="border-0 shadow-xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-3xl overflow-hidden p-6">
@@ -123,35 +121,45 @@ export default function SoolCalendar() {
 
         {/* 날짜 그리드 */}
         <div className="w-full">
-          {rows}
+          {isLoading ? (
+            <div className="text-center py-10 text-slate-400">기록을 불러오는 중...</div>
+          ) : rows}
         </div>
       </Card>
       
-      {/* 선택된 날짜 상세 내역 뷰어 (임시) */}
+      {/* 선택된 날짜 상세 내역 뷰어 */}
       <div className="mt-6 px-2">
         <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">
           {format(selectedDate, 'M월 d일')}의 기록
         </h3>
         
-        {DUMMY_RECORDS.find(record => isSameDay(record.date, selectedDate)) ? (
-          <Card className="border-0 shadow-md bg-white dark:bg-zinc-800 rounded-2xl p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-950 flex items-center justify-center text-orange-600">
-              <Wine size={24} />
-            </div>
-            <div>
-              <p className="font-bold text-slate-900 dark:text-white">최고의 싱글몰트 위스키</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-zinc-700 rounded-md font-medium">Whiskey</span>
-                <span className="text-xs text-orange-500 font-bold">★ 5.0</span>
-              </div>
-            </div>
-          </Card>
+        {selectedDateReviews.length > 0 ? (
+          <div className="space-y-3">
+            {selectedDateReviews.map(record => (
+              <Link key={record.id} href={`/review/${record.id}`}>
+                <Card className="border-0 shadow-md bg-white dark:bg-zinc-800 rounded-2xl p-4 flex items-center gap-4 hover:border-orange-200 transition-colors cursor-pointer">
+                  <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-950 flex items-center justify-center text-orange-600">
+                    <Wine size={24} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">{record.drink_name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-zinc-700 rounded-md font-medium">{record.drink_category}</span>
+                      <span className="text-xs text-orange-500 font-bold">★ {record.rating}</span>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
         ) : (
           <div className="text-center py-10 bg-slate-50 dark:bg-zinc-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800">
             <p className="text-slate-400 text-sm">이 날은 간이 쉬어가는 날이었네요! 🌿</p>
-            <Button variant="outline" className="mt-4 rounded-xl border-orange-200 text-orange-600 hover:bg-orange-50">
-              새로운 기록 추가하기
-            </Button>
+            <Link href="/add">
+              <Button variant="outline" className="mt-4 rounded-xl border-orange-200 text-orange-600 hover:bg-orange-50">
+                새로운 기록 추가하기
+              </Button>
+            </Link>
           </div>
         )}
       </div>
