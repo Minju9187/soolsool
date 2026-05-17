@@ -18,6 +18,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useGetMyReviews } from '@/features/reviews/api/useReviews';
 import Link from 'next/link';
+import { ReviewListItem } from '@/features/reviews/components/ReviewListItem';
 
 export default function SoolCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -136,20 +137,14 @@ export default function SoolCalendar() {
         {selectedDateReviews.length > 0 ? (
           <div className="space-y-3">
             {selectedDateReviews.map(record => (
-              <Link key={record.id} href={`/review/${record.id}`}>
-                <Card className="border-0 shadow-md bg-white dark:bg-zinc-800 rounded-2xl p-4 flex items-center gap-4 hover:border-orange-200 transition-colors cursor-pointer">
-                  <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-950 flex items-center justify-center text-orange-600">
-                    <Wine size={24} />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900 dark:text-white">{record.drink_name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-zinc-700 rounded-md font-medium">{record.drink_category}</span>
-                      <span className="text-xs text-orange-500 font-bold">★ {record.rating}</span>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
+              <ReviewListItem 
+                key={record.id}
+                id={record.id}
+                drinkName={record.drink_name}
+                drinkCategory={record.drink_category}
+                rating={record.rating}
+                showIcon={true}
+              />
             ))}
           </div>
         ) : (

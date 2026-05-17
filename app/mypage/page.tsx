@@ -9,6 +9,7 @@ import { useGetMyProfile } from '@/features/profiles/api/useProfile';
 import { useGetMyReviews } from '@/features/reviews/api/useReviews';
 import { useGetMyWishlists } from '@/features/wishlist/api/useWishlist';
 import Link from 'next/link';
+import { ReviewListItem } from '@/features/reviews/components/ReviewListItem';
 
 export default function MyPage() {
   const [activeTab, setActiveTab] = useState<'reviews' | 'wishlist'>('reviews');
@@ -86,18 +87,14 @@ export default function MyPage() {
         {activeTab === 'reviews' ? (
           myReviews.length > 0 ? (
             myReviews.map((review) => (
-              <Link key={review.id} href={`/review/${review.id}`} className="block">
-                <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 flex justify-between items-center transition-transform active:scale-[0.98] cursor-pointer">
-                  <div>
-                    <h3 className="font-bold text-slate-800 dark:text-slate-200">{review.drink_name}</h3>
-                    <span className="text-xs text-slate-400">{review.consumed_date} • {review.drink_category}</span>
-                  </div>
-                  <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/30 px-3 py-1.5 rounded-lg">
-                    <Star size={14} className="fill-amber-400 text-amber-400" />
-                    <span className="font-bold text-amber-600 dark:text-amber-400 text-sm">{review.rating}</span>
-                  </div>
-                </div>
-              </Link>
+              <ReviewListItem
+                key={review.id}
+                id={review.id}
+                drinkName={review.drink_name}
+                drinkCategory={review.drink_category}
+                rating={review.rating}
+                subtitle={review.consumed_date}
+              />
             ))
           ) : (
             <div className="text-center text-slate-500 py-10">아직 남긴 평가가 없습니다.</div>

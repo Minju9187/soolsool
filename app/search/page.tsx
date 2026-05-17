@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { Search, History, TrendingUp, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useSearchReviews } from '@/features/search/api/useSearch';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
+import { ReviewListItem } from '@/features/reviews/components/ReviewListItem';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -94,18 +96,14 @@ export default function SearchPage() {
             <div className="text-center py-10 text-slate-400">결과를 찾는 중...</div>
           ) : searchResults && searchResults.length > 0 ? (
             searchResults.map((review) => (
-              <Link key={review.id} href={`/review/${review.id}`} className="block">
-                <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 flex justify-between items-center transition-transform hover:border-orange-200 cursor-pointer">
-                  <div>
-                    <h3 className="font-bold text-slate-800 dark:text-slate-200">{review.drink_name}</h3>
-                    <span className="text-xs text-slate-400">{review.drink_category} • {review.profiles?.nickname} 작성</span>
-                  </div>
-                  <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/30 px-3 py-1.5 rounded-lg">
-                    <Star size={14} className="fill-amber-400 text-amber-400" />
-                    <span className="font-bold text-amber-600 dark:text-amber-400 text-sm">{review.rating}</span>
-                  </div>
-                </div>
-              </Link>
+              <ReviewListItem
+                key={review.id}
+                id={review.id}
+                drinkName={review.drink_name}
+                drinkCategory={review.drink_category}
+                rating={review.rating}
+                subtitle={`${review.profiles?.nickname} 작성`}
+              />
             ))
           ) : (
             <div className="text-center py-20 bg-slate-50 dark:bg-zinc-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800">
